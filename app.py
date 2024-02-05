@@ -30,12 +30,9 @@ ROUTES
 @app.route('/users/new', methods=['POST'])
 @require_user_type(database, UserType.SUPER_ADMIN)
 def register_user(current_user):
-
     payload = json.loads(request.data)
     return user_registration(payload)
     
-    return {}, 200
-
 
 @app.route('/users/login', methods=['POST'])
 def login():
