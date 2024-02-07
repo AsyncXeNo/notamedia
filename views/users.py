@@ -333,3 +333,17 @@ def create_new_client_user(database: Database, active: bool = True) -> dict:
             "data": None
         }
     
+
+def all_users(database: Database) -> (dict, int):
+    
+    users_collection = database.get_collection(collections[User])
+
+    users = list(users_collection.find())
+    for user in users:
+        user['_id'] = str(user['_id'])
+
+    return {
+        "payload": users,
+        "status": "success",
+        "message": ""
+    }, 200

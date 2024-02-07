@@ -7,7 +7,7 @@ class ProductType:
     def __init__(self, name: str) -> None:
         self.name = name
 
-    def json(self):
+    def to_dict(self):
         return {
             "name": self.name
         }
