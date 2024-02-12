@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from bson import ObjectId
 from functools import wraps
+from typing import Tuple
 
 import jwt
 from loguru import logger
@@ -13,6 +14,7 @@ from pymongo.database import Database
 from env import get_var
 from models.user import User, UserType
 from models import collections
+from views.response import Response
 
 
 def generate_hash(password: str) -> str:
@@ -34,7 +36,7 @@ def generate_jwt_token(user_id: ObjectId | str, user_name: str, user_type: int, 
     return token
 
 
-def verify_jwt_token(token: str) -> (bool, dict):
+def verify_jwt_token(token: str) -> Tuple[bool, dict]:
     try:
         payload = jwt.decode(token, get_var('SECRET_KEY'), algorithms=['HS256'])
         return True, payload
@@ -99,7 +101,7 @@ def require_user_type(database: Database, *types):
     return decorator
 
 
-def user_login(database: Database, payload: dict) -> (dict, int):
+def user_login(database: Database, payload: dict) -> Tuple[dict, int]:
 
     if not payload.get('username') or not payload.get('password'):
         return {
@@ -146,7 +148,7 @@ def user_login(database: Database, payload: dict) -> (dict, int):
     }, 200
 
 
-def user_registration(current_user: dict, database: Database, payload: dict) -> (dict, int):
+def user_registration(current_user: dict, database: Database, payload: dict) -> Tuple[dict, int]:
 
     if (not payload.get('username')) or (not payload.get('password')) or (not payload.get('user_type')) or (payload.get('is_active') is None):
         return {
@@ -209,7 +211,7 @@ def user_registration(current_user: dict, database: Database, payload: dict) -> 
     }, 500
 
 
-def user_deletion(current_user: dict, database: Database, payload: dict) -> (dict, int):
+def user_deletion(current_user: dict, database: Database, payload: dict) -> Tuple[dict, int]:
     
     if (not payload.get('username')):
         return {
@@ -240,7 +242,7 @@ def user_deletion(current_user: dict, database: Database, payload: dict) -> (dic
     }, 204
 
 
-def user_updation(current_user: dict, database: Database, payload: dict) -> (dict, int):
+def user_updation(current_user: dict, database: Database, payload: dict) -> Tuple[dict, int]:
     
     if (not payload.get('username')) or (not payload.get('new')):
         return {
@@ -257,7 +259,7 @@ def user_updation(current_user: dict, database: Database, payload: dict) -> (dic
             return {
                 "payload": None,
                 "status": "error",
-                "message": "Invalid attributes to update"
+                "message": f"Invalid attribute to update: {key}"
             }, 400
         
     users_collection = database.get_collection(collections[User])
@@ -289,7 +291,7 @@ def user_updation(current_user: dict, database: Database, payload: dict) -> (dic
     return {
         "payload": None,
         "status": "error",
-        "message": "User registration failed"
+        "message": "User updation failed"
     }, 500
 
 
@@ -334,7 +336,7 @@ def create_new_client_user(database: Database, active: bool = True) -> dict:
         }
     
 
-def all_users(database: Database) -> (dict, int):
+def all_users(database: Database) -> Tuple[dict, int]:
     
     users_collection = database.get_collection(collections[User])
 

@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from loguru import logger
 from pymongo.database import Database
 
@@ -5,7 +7,7 @@ from models import collections
 from models.product import ProductType
 
 
-def product_type_creation(current_user: dict, database: Database, payload: dict) -> (dict, int):
+def product_type_creation(current_user: dict, database: Database, payload: dict) -> Tuple[dict, int]:
 
     if (not payload.get('name')):
         return {
@@ -47,7 +49,7 @@ def product_type_creation(current_user: dict, database: Database, payload: dict)
     }, 500
 
 
-def product_type_deletion(current_user: dict, database: Database, payload: dict) -> (dict, int):
+def product_type_deletion(current_user: dict, database: Database, payload: dict) -> Tuple[dict, int]:
     
     if (not payload.get('name')):
         return {
@@ -75,7 +77,7 @@ def product_type_deletion(current_user: dict, database: Database, payload: dict)
         "message": "Product type successfully deleted"
     }, 204
 
-def all_product_types(database: Database) -> (dict, int):
+def all_product_types(database: Database) -> Tuple[dict, int]:
     
     product_types_collection = database.get_collection(collections[ProductType])
 
@@ -87,5 +89,4 @@ def all_product_types(database: Database) -> (dict, int):
         "payload": product_types,
         "status": "success",
         "message": ""
-    }
-    
+    }, 200
