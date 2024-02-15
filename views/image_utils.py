@@ -34,7 +34,17 @@ def save_image(encoded_image):
     
     except Exception as e:
         return { "error": str(e) }
-    
+
+
+def get_image(filename):
+    try:
+        with open(filename, "rb") as f:
+            image_bytes = f.read()
+            encoded_image = base64.b64encode(image_bytes).decode("utf-8")
+            return { "data": encoded_image }
+    except Exception as e:
+            return { "error": str(e) }
+
 
 def delete_image(filename) -> bool:
     try:

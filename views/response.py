@@ -2,7 +2,7 @@ from typing import Tuple
 
 
 class Response:
-    def __init__(self, code: int, status: str, payload: dict | None = None, message: str | None = None):
+    def __init__(self, code: int, status: str, message: str | None = None, payload: dict | None = None):
         self.code = code
         self.status = status
         self.payload = payload

@@ -6,7 +6,7 @@ from pymongo.database import Database
 
 from models import collections
 from models.signature import Signature
-from views.image_utils import get_image_info, save_image, delete_image
+from views.image_utils import get_image_info, save_image, delete_image, get_image
 from views.response import Response
 
 
@@ -118,6 +118,9 @@ def signature_updation(current_user: dict, database: Database, payload: dict) ->
         if key not in signature.keys():
             return Response(400, "error", message=f"Invalid attribute to update: {key}")
         
+    if new.get('_id'):
+        return Response(400, "error", message=f"Invalid attribute to update: _id")
+    
     if new.get('unique_name'):
         return Response(400, "error", message=f"Invalid attribute to update: unique_name")
         
@@ -154,12 +157,38 @@ def signature_updation(current_user: dict, database: Database, payload: dict) ->
     return Response(500, "error", "Signature updation failed")
     
 
+def signature_existing(current_user: dict, database: Database, payload: dict) -> Response:
+    
+    if not payload.get('unique_name'):
+        return Response(400, "error", message="Incomplete information")
+    
+    unique_name = payload['unique_name']
+    signatures_collection = database.get_collection(collections[Signature])
+
+    signature = signatures_collection.find_one({ 'unique_name': unique_name })
+
+    if not signature:
+        return Response(400, "error", message="Signature not found")
+
+    del(signature['_id'])
+    image_encoded = get_image(signature['sender_picture'])
+    if image_encoded.get('error'):
+        return Response(500, "error", message="Error while reading image for signature")
+    signature['sender_picture'] = image_encoded.get('data')
+    
+    return Response(200, "success", payload=signature)
+
+
 def all_signatures(database: Database) -> Response:
 
     signatures_collection = database.get_collection(collections[Signature])
     signatures = list(signatures_collection.find())
     for signature in signatures:
         signature['_id'] = str(signature['_id'])
+        image_encoded = get_image(signature['sender_picture'])
+        if image_encoded.get('error'):
+            return Response(500, "error", message=f'Error while reading image for signature named "{signature["unique_name"]}"')
+        signature['sender_picture'] = image_encoded.get('data')
 
     return Response(200, "success", payload=signatures)
     

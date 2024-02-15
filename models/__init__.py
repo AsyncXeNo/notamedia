@@ -1,7 +1,6 @@
 from .user import User
 from .signature import Signature
 from .product import Product, ProductType
-from .people import People
 from .industry import Industry
 from .email_template import EmailTemplate
 from .comparison import Comparison
@@ -16,7 +15,6 @@ collections = {
     PaymentTerms: "payment_terms",
     ProposalType: "proposal_type",
     Product: "products",
-    People: "people",
     Industry: "industries",
     EmailTemplate: "email_templates",
     Comparison: "comparisons",

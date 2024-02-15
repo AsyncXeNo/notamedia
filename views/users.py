@@ -14,7 +14,6 @@ from pymongo.database import Database
 from env import get_var
 from models.user import User, UserType
 from models import collections
-from views.response import Response
 
 
 def generate_hash(password: str) -> str:
