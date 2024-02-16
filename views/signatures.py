@@ -145,12 +145,13 @@ def signature_updation(current_user: dict, database: Database, payload: dict) ->
         
         sender_picture = save_info['filename']
         new['sender_picture'] = sender_picture
-        delete_image(signature['sender_picture'])
         
     updated = signatures_collection.update_one({ 'unique_name': unique_name }, { '$set': new })
 
     if updated.acknowledged:
         logger.debug(f'signature named "{unique_name}" updated by user named "{current_user["name"]}", updated: {new}')
+
+        delete_image(signature['sender_picture'])
 
         return Response(200, "success", "Signature updated successfully")
 

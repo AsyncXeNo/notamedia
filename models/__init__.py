@@ -4,7 +4,7 @@ from .product import Product, ProductType
 from .industry import Industry
 from .email_template import EmailTemplate
 from .comparison import Comparison
-from .company import Company
+from .company import Company, PlanType
 from .commercial import Commercial, PaymentTerms, ProposalType
 
 
@@ -18,6 +18,7 @@ collections = {
     Industry: "industries",
     EmailTemplate: "email_templates",
     Comparison: "comparisons",
+    PlanType: 'plan_types',
     Company: "companies",
     Commercial: "commercials"
 }

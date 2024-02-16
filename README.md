@@ -8,9 +8,9 @@ This repository contains the backend of the web utility project.
 - [x] Access control
 - [ ] Data storage, updation and retrieval
     - [x] Signatures
-    - [ ] Products and Product Types
-    - [ ] Email Templates
-    - [ ] Comparisons
+    - [x] Products and Product Types
+    - [x] Email Templates
+    - [x] Comparisons
     - [ ] Companies, People and Industries
     - [ ] Commercials
 - [ ] Document generation

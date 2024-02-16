@@ -2,8 +2,19 @@ from bson import ObjectId
 from datetime import datetime
 
 
+class PlanType:
+    def __init__(self, name: str):
+        self.name = name
+
+    def to_dict(self):
+        return {
+            'name': self.name,
+        }
+
+
 class Company:
-    def __init__(self, name: str, logo: str, people: list[dict], company_websites: list, 
+    def __init__(self, name: str, logo: str, people: list[dict],
+                 company_websites: list, 
                  state: str, client_location_for_tax: str, start_date: datetime, 
                  full_address_with_pin: str, industry: dict, plan_type: str, 
                  bitrix_url: str, license_extension: str):
