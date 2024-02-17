@@ -11,7 +11,9 @@ This repository contains the backend of the web utility project.
     - [x] Products and Product Types
     - [x] Email Templates
     - [x] Comparisons
-    - [ ] Companies, People and Industries
+    - [x] Industries
+    - [x] Plan types
+    - [x] Companies
     - [ ] Commercials
 - [ ] Document generation
 - [ ] Landing Page Generation

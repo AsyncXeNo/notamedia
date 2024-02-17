@@ -151,7 +151,8 @@ def signature_updation(current_user: dict, database: Database, payload: dict) ->
     if updated.acknowledged:
         logger.debug(f'signature named "{unique_name}" updated by user named "{current_user["name"]}", updated: {new}')
 
-        delete_image(signature['sender_picture'])
+        if new.get('sender_picture'):
+            delete_image(signature['sender_picture'])
 
         return Response(200, "success", "Signature updated successfully")
 

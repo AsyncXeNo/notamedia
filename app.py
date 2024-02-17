@@ -15,6 +15,8 @@ from views.signatures import signature_creation, signature_deletion, signature_u
 from views.comparisons import comparison_creation, comparison_updation, comparison_deletion, comparison_existing, all_comparisons
 from views.email_templates import email_template_creation, email_template_updation, email_template_deletion, email_template_existing, all_email_templates
 from views.industries import industry_creation, industry_updation, industry_deletion, industry_existing, all_industries
+from views.plan_types import plan_type_creation, plan_type_deletion, plan_type_existing, all_plan_types
+from views.companies import company_creation, company_updation, company_deletion, company_existing, all_companies
 from views.response import Response
 from mongo import setup
 
@@ -385,6 +387,99 @@ def get_industries(current_user):
 
     return all_industries(database).to_response()
 
+
+"""
+PLAN TYPE ROUTES
+"""
+
+
+@app.route('/plan_types/new', methods=['POST'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def create_plan_type(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return plan_type_creation(current_user, database, payload).to_response()
+
+
+
+@app.route('/plan_types/delete', methods=['DELETE'])
+@require_user_type(database, UserType.SUPER_ADMIN)
+def delete_plan_type(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return plan_type_deletion(current_user, database, payload).to_response()
+
+
+@app.route('/plan_types/existing', methods=['GET'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def get_existing_plan_type(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return plan_type_existing(current_user, database, payload).to_response()
+
+
+@app.route('/plan_types', methods=['GET'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def get_plan_types(current_user):
+
+    return all_plan_types(database).to_response()
+
+
+"""
+COMPANY ROUTES
+"""
+
+@app.route('/companies/new', methods=['POST'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def create_company(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return company_creation(current_user, database, payload).to_response()
+
+
+@app.route('/companies/update', methods=['PUT'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def update_company(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return company_updation(current_user, database, payload).to_response()
+
+
+@app.route('/companies/delete', methods=['DELETE'])
+@require_user_type(database, UserType.SUPER_ADMIN)
+def delete_company(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return company_deletion(current_user, database, payload).to_response()
+
+
+@app.route('/companies/existing', methods=['GET'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def get_existing_company(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return company_existing(current_user, database, payload).to_response()
+
+
+@app.route('/companies', methods=['GET'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def get_companies(current_user):
+
+    return all_companies(database).to_response()
     
 
 if __name__ == '__main__':
