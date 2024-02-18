@@ -238,7 +238,7 @@ def user_deletion(current_user: dict, database: Database, payload: dict) -> Tupl
         "payload": None,
         "status": "success",
         "message": "User successfully deleted"
-    }, 204
+    }, 200
 
 
 def user_updation(current_user: dict, database: Database, payload: dict) -> Tuple[dict, int]:

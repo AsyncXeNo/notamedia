@@ -14,6 +14,9 @@ def industry_creation(current_user: dict, database: Database, payload: dict) -> 
         images = payload['images']
     except KeyError:
         return Response(400, 'error', 'Incomplete information')
+    
+    if not name or not images:
+        return Response(400, 'error', 'Incomplete information')
 
     industries_collection = database.get_collection(collections.get(Industry))
 
@@ -46,7 +49,7 @@ def industry_creation(current_user: dict, database: Database, payload: dict) -> 
         images_to_save
     )
 
-    inserted = industries_collection.insert_one(industry)
+    inserted = industries_collection.insert_one(industry.to_dict())
 
     if inserted.acknowledged:
         logger.debug(f'new industry ("{name}") created by user named "{current_user["name"]}"')
@@ -64,6 +67,7 @@ def industry_updation(current_user: dict, database: Database, payload: dict) -> 
     name = payload.get('name')
     new = payload.get('new')
 
+    name = new.get('name')
     images = new.get('images')
 
     industries_collection = database.get_collection(collections.get(Industry))
@@ -72,33 +76,42 @@ def industry_updation(current_user: dict, database: Database, payload: dict) -> 
     if not existing_industry:
         return Response(404, 'error', 'Industry not found')
 
-    restrictions = Industry.get_image_restrictions()
-    images_to_save = []
-    for image in images:
-        img_info = get_image_info(image)
-        
-        if img_info.get('error'):
-            return Response(400, "error", message="Invalid image")
+    if images:
+        restrictions = Industry.get_image_restrictions()
+        images_to_save = []
+        for image in images:
+            img_info = get_image_info(image)
             
-        if img_info['format'] not in restrictions['allowed_formats']:
-            return Response(400, "error", message=f"Invalid image format: {img_info['format']}")
+            if img_info.get('error'):
+                return Response(400, "error", message="Invalid image")
+                
+            if img_info['format'] not in restrictions['allowed_formats']:
+                return Response(400, "error", message=f"Invalid image format: {img_info['format']}")
+                
+            if img_info['width'] < restrictions['width'][0] or img_info['width'] > restrictions['width'][1] or img_info['height'] < restrictions['height'][0] or img_info['height'] > restrictions['height'][1]:
+                return Response(500, "error", message="Error while saving image")
             
-        if img_info['width'] < restrictions['width'][0] or img_info['width'] > restrictions['width'][1] or img_info['height'] < restrictions['height'][0] or img_info['height'] > restrictions['height'][1]:
-            return Response(500, "error", message="Error while saving image")
-        
-        save_info = save_image(image)
-        if save_info.get('error'):
-            return Response(500, "error", message="Error while saving image")
+            save_info = save_image(image)
+            if save_info.get('error'):
+                return Response(500, "error", message="Error while saving image")
 
-        images_to_save.append(save_info['filename'])
+            images_to_save.append(save_info['filename'])
 
-    updated = industries_collection.update_one({ 'name': name }, { '$set': { 'images': images_to_save } })
+    new = {}
+    
+    if name:
+        new['name'] = name
+    if images:
+        new['images'] = images_to_save
+
+    updated = industries_collection.update_one({ 'name': name }, { '$set': new })
 
     if updated.acknowledged:
         logger.debug(f'industry named "{name}" updated by user named "{current_user["name"]}"')
 
-        for image in images:
-            delete_image(image)
+        if images:
+            for image in existing_industry['images']:
+                delete_image(image)
         
         return Response(200, 'success', 'Industry successfully updated')
     
@@ -124,7 +137,7 @@ def industry_deletion(current_user: dict, database: Database, payload: dict) -> 
     industries_collection.delete_one({ 'name': name })
     logger.warning(f'industry named "{name}" deleted by user named "{current_user["name"]}"')
 
-    return Response(204, 'success', 'Industry deleted successfully')
+    return Response(200, 'success', 'Industry deleted successfully')
 
 
 def industry_existing(current_user: dict, database: Database, payload: dict) -> Response:

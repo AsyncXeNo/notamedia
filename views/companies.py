@@ -20,6 +20,9 @@ def company_creation(current_user: dict, database: Database, payload: dict) -> R
         client_location_for_tax = payload['client_location_for_tax']
     except KeyError:
         return Response(400, 'error', 'Incomplete information')
+    
+    if not name or not logo or not people or not company_websites or not state or not client_location_for_tax:
+        return Response(400, 'error', 'Incomplete information')
 
     start_date = payload.get('start_date')
     full_address_with_pin = payload.get('full_address_with_pin')
@@ -62,7 +65,7 @@ def company_creation(current_user: dict, database: Database, payload: dict) -> R
     
     logo = save_info.get('filename')
 
-    if client_location_for_tax not in [ClientLocationForTax.INSIDE_DELHI, ClientLocationForTax.OUTSIDE_DELHI, ClientLocationForTax.FOREIGN, ClientLocationForTax.NO_TEX]:
+    if client_location_for_tax not in [1, 2, 3, 4]:
         return Response(400, 'error', message='Invalid client location for tax')
     
     company = Company(
@@ -81,7 +84,7 @@ def company_creation(current_user: dict, database: Database, payload: dict) -> R
         license_extension
     )
 
-    inserted = companies_collection.insert_one(company)
+    inserted = companies_collection.insert_one(company.to_dict())
 
     if inserted.acknowledged:
         logger.debug(f'new company ("{name}") created by user named "{current_user["name"]}"')
@@ -111,9 +114,6 @@ def company_updation(current_user: dict, database: Database, payload: dict) -> R
     if new.get('_id'):
         return Response(400, "error", message=f"Invalid attribute to update: _id")
     
-    if new.get('name'):
-        return Response(400, "error", message=f"Invalid attribute to update: name")
-    
     if new.get('logo'):
         logo = new['logo']
         # Process and save logo
@@ -137,7 +137,7 @@ def company_updation(current_user: dict, database: Database, payload: dict) -> R
         new['logo'] = logo
 
     if new.get('client_location_for_tax'):
-        if new['client_location_for_tax'] not in [ClientLocationForTax.INSIDE_DELHI, ClientLocationForTax.OUTSIDE_DELHI, ClientLocationForTax.FOREIGN, ClientLocationForTax.NO_TEX]:
+        if new['client_location_for_tax'] not in [1, 2, 3, 4]:
             return Response(400, 'error', message='Invalid client location for tax')
         
     updated = companies_collection.update_one({ 'name': name }, { '$set': new })
@@ -170,7 +170,7 @@ def company_deletion(current_user: dict, database: Database, payload: dict) -> R
     logger.warning(f'company named {name} deleted by user named "{current_user["name"]}"')
 
     delete_image(existing_company['logo'])
-    return Response(204, 'success', 'Company deleted successfully')
+    return Response(200, 'success', 'Company deleted successfully')
 
 
 def company_existing(current_user: dict, database: Database, payload: dict) -> Response:
@@ -193,17 +193,23 @@ def company_existing(current_user: dict, database: Database, payload: dict) -> R
         return Response(500, 'error', 'Error while reading logo image')
     
     existing_company['logo'] = image_encoded.get('data')
-    del(existing_company['_id'])
+    existing_company['_id'] = str(existing_company['_id'])
 
     return Response(200, 'success', payload=existing_company)
 
 
-def all_companies(current_user: dict, database: Database, payload: dict) -> Response:
+def all_companies(database: Database) -> Response:
     
     companies_collection = database.get_collection(collections.get(Company))
     companies = list(companies_collection.find())
 
-    companies = list(map(lambda cmp: { cmp['name'] }, companies))
+    companies_to_return = []
 
-    return Response(200, 'success', payload=companies)
+    for company in companies:
+        companies_to_return.append({
+            '_id': str(company['_id']),
+            'name': company['name']
+        })
+
+    return Response(200, 'success', payload=companies_to_return)
     

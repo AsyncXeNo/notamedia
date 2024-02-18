@@ -26,6 +26,9 @@ def signature_creation(current_user: dict, database: Database, payload: dict) ->
     except:
         return Response(400, "error", message="Incomplete information")
     
+    if not unique_name or not sender_full_name or not sender_short_name or not sender_designation or not sender_phone or not sender_email or not sender_company_website or not sender_picture or not sender_company_name:
+        return Response(400, "error", message="Incomplete information")
+    
     signatures_collection = database.get_collection(collections[Signature])
     existing_signature = signatures_collection.find_one({ 'unique_name': unique_name })
 
@@ -97,7 +100,7 @@ def signature_deletion(current_user: dict, database: Database, payload: dict) ->
     signatures_collection.delete_one({ 'unique_name': unique_name })
     logger.warning(f'signature named "{unique_name}" deleted by user named "{current_user["name"]}"')
 
-    return Response(204, "success", "Signature successfully deleted")
+    return Response(200, "success", "Signature successfully deleted")
 
 
 def signature_updation(current_user: dict, database: Database, payload: dict) -> Response:
@@ -120,9 +123,6 @@ def signature_updation(current_user: dict, database: Database, payload: dict) ->
         
     if new.get('_id'):
         return Response(400, "error", message=f"Invalid attribute to update: _id")
-    
-    if new.get('unique_name'):
-        return Response(400, "error", message=f"Invalid attribute to update: unique_name")
         
     if new.get('sender_picture'):
         # Process and save picture
@@ -172,7 +172,7 @@ def signature_existing(current_user: dict, database: Database, payload: dict) ->
     if not signature:
         return Response(400, "error", message="Signature not found")
 
-    del(signature['_id'])
+    signature['_id'] = str(signature['_id'])
     image_encoded = get_image(signature['sender_picture'])
     if image_encoded.get('error'):
         return Response(500, "error", message="Error while reading image for signature")

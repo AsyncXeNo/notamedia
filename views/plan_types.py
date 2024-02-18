@@ -47,25 +47,7 @@ def plan_type_deletion(current_user: dict, database: Database, payload: dict) ->
 
     plan_types_collection.delete_one({ 'name': name })
     
-    return Response(204, 'success', 'Plan type deleted successfully')
-
-
-def plan_type_existing(current_user: dict, database: Database, payload: dict) -> Response:
-    
-    if not payload.get('name'):
-        return Response(400, 'error', 'Incomplete information')
-    
-    name = payload['name']
-    
-    plan_types_collection = database.get_collection(collections.get(PlanType))
-    
-    existing_type = plan_types_collection.find_one({ 'name': name })
-    if not existing_type:
-        return Response(404, 'error', 'Plan type does not exist')
-    
-    del(existing_type['_id'])
-
-    return Response(200, 'success', payload = existing_type)
+    return Response(200, 'success', 'Plan type deleted successfully')
 
 
 def all_plan_types(database: Database) -> Response:

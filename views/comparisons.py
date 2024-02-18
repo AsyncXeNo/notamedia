@@ -14,6 +14,9 @@ def comparison_creation(current_user: dict, database: Database, payload: dict) -
         summary = payload['summary']
     except KeyError:
         return Response(400, 'error', message='Incomplete information')
+
+    if not title or not table_data or not summary:
+        return Response(400, "error", message="Incomplete information")
     
     comparisons_collection = database.get_collection(collections.get(Comparison))
 
@@ -47,7 +50,7 @@ def comparison_updation(current_user: dict, database: Database, payload: dict) -
     new = payload['new']
 
     for key in new.keys():
-        if key not in ['table_data', 'summary']:
+        if key not in ['table_data', 'summary', "title"]:
             return Response(400, "error", message=f"Invalid attribute to update: {key}")
         
     comparisons_collection = database.get_collection(collections.get(Comparison))
@@ -66,8 +69,24 @@ def comparison_updation(current_user: dict, database: Database, payload: dict) -
     
 
 def comparison_deletion(current_user: dict, database: Database, payload: dict) -> Response:
-    pass
+    
+    if not payload.get('title'):
+        return Response(400, 'error', message='Incomplete information')
 
+    title = payload['title']
+
+    comparisons_collection = database.get_collection(collections.get(Comparison))
+
+    existing_collection = comparisons_collection.find_one({ 'title': title })
+    if not existing_collection:
+        return Response(404, 'error', message='Comparison not found')
+    
+    comparisons_collection.delete_one({ 'title': title })
+
+    logger.warning(f'comparison titled {title} deleted by user named "{current_user["name"]}"')
+
+    return Response(200, 'success', message='Comparison successfully deleted')
+    
 
 def comparison_existing(current_user: dict, database: Database, payload: dict) -> Response:
     

@@ -15,8 +15,11 @@ from views.signatures import signature_creation, signature_deletion, signature_u
 from views.comparisons import comparison_creation, comparison_updation, comparison_deletion, comparison_existing, all_comparisons
 from views.email_templates import email_template_creation, email_template_updation, email_template_deletion, email_template_existing, all_email_templates
 from views.industries import industry_creation, industry_updation, industry_deletion, industry_existing, all_industries
-from views.plan_types import plan_type_creation, plan_type_deletion, plan_type_existing, all_plan_types
+from views.plan_types import plan_type_creation, plan_type_deletion, all_plan_types
 from views.companies import company_creation, company_updation, company_deletion, company_existing, all_companies
+from views.proposal_types import proposal_type_creation, proposal_type_deletion, all_proposal_types
+from views.payment_terms import payment_terms_creation, payment_terms_updation, payment_terms_deletion, payment_terms_existing, all_payment_terms
+from views.commercials import commercial_creation, commercial_updation, commercial_deletion, commercial_existing, all_commercials
 from views.response import Response
 from mongo import setup
 
@@ -414,16 +417,6 @@ def delete_plan_type(current_user):
     return plan_type_deletion(current_user, database, payload).to_response()
 
 
-@app.route('/plan_types/existing', methods=['GET'])
-@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
-def get_existing_plan_type(current_user):
-
-    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
-
-    payload = json.loads(request.data)
-    return plan_type_existing(current_user, database, payload).to_response()
-
-
 @app.route('/plan_types', methods=['GET'])
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_plan_types(current_user):
@@ -481,6 +474,142 @@ def get_companies(current_user):
 
     return all_companies(database).to_response()
     
+
+"""
+PROPOSAL TYPE ROUTES
+"""
+
+@app.route('/proposal_types/new', methods=['POST'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def create_proposal_type(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return proposal_type_creation(current_user, database, payload).to_response()
+
+
+
+@app.route('/proposal_types/delete', methods=['DELETE'])
+@require_user_type(database, UserType.SUPER_ADMIN)
+def delete_proposal_type(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return proposal_type_deletion(current_user, database, payload).to_response()
+
+
+@app.route('/proposal_types', methods=['GET'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def get_proposal_types(current_user):
+
+    return all_proposal_types(database).to_response()
+
+
+"""
+PAYMENT TERMS
+"""
+
+
+@app.route('/payment_terms/new', methods=['POST'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def create_payment_terms(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return payment_terms_creation(current_user, database, payload).to_response()
+
+
+@app.route('/payment_terms/update', methods=['PUT'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def update_payment_terms(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return payment_terms_updation(current_user, database, payload).to_response()
+
+
+@app.route('/payment_terms/delete', methods=['DELETE'])
+@require_user_type(database, UserType.SUPER_ADMIN)
+def delete_payment_terms(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return payment_terms_deletion(current_user, database, payload).to_response()
+
+
+@app.route('/payment_terms/existing', methods=['GET'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def get_existing_payment_terms(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return payment_terms_existing(current_user, database, payload).to_response()
+
+
+@app.route('/payment_terms', methods=['GET'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def get_payment_terms(current_user):
+
+    return all_payment_terms(database).to_response()
+
+
+"""
+COMMERCIAL ROUTES
+"""
+
+
+@app.route('/commercials/new', methods=['POST'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def create_commercial(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return commercial_creation(current_user, database, payload).to_response()
+
+
+@app.route('/commercials/update', methods=['PUT'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def update_commercial(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return commercial_updation(current_user, database, payload).to_response()
+
+
+@app.route('/commercials/delete', methods=['DELETE'])
+@require_user_type(database, UserType.SUPER_ADMIN)
+def delete_commercial(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return commercial_deletion(current_user, database, payload).to_response()
+
+
+@app.route('/commercials/existing', methods=['GET'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def get_existing_commercial(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return commercial_existing(current_user, database, payload).to_response()
+
+
+@app.route('/commercials', methods=['GET'])
+@require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
+def get_commercials(current_user):
+
+    return all_commercials(database).to_response()
+
 
 if __name__ == '__main__':
 

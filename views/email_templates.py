@@ -26,6 +26,9 @@ def email_template_creation(current_user: dict, database: Database, payload: dic
         payment_url = payload['payment_url']
     except KeyError:
         return Response(400, 'error', message='Incomplete information')
+
+    if not type_:
+        return Response(400, "error", message="Incomplete information")
     
     email_templates_collection = database.get_collection(collections.get(EmailTemplate))
 
@@ -49,7 +52,7 @@ def email_template_creation(current_user: dict, database: Database, payload: dic
         payment_url
     )
     
-    inserted = email_templates_collection.insert_one(template)
+    inserted = email_templates_collection.insert_one(template.to_dict())
 
     if inserted.acknowledged:
         logger.debug(f'new email template created by user named "{current_user["name"]}"')
@@ -106,7 +109,7 @@ def email_template_deletion(current_user: dict, database: Database, payload: dic
     email_templates_collection.delete_one({ 'type': type_ })
     logger.warning(f'Email template ("{type_}") has been deleted by user named "{current_user["name"]}"')
 
-    return Response(204, 'success', 'Template successfully deleted')
+    return Response(200, 'success', 'Template successfully deleted')
 
 
 def email_template_existing(current_user: dict, database: Database, payload: dict) -> Response:
@@ -122,7 +125,7 @@ def email_template_existing(current_user: dict, database: Database, payload: dic
     if not existing_template:
         return Response(404, 'error', message='Template does not exist')
 
-    del(existing_template['_id'])
+    existing_template['_id'] = str(existing_template['_id'])
     
     return Response(200, 'success', payload=existing_template)
 

@@ -24,7 +24,7 @@ class ClientLocationForTax(Enum):
     INSIDE_DELHI = 1
     OUTSIDE_DELHI = 2
     FOREIGN = 3
-    NO_TEX = 4
+    NO_TAX = 4
 
 
 class PlanType:
@@ -61,7 +61,7 @@ class Company:
         self.start_date = start_date
         self.full_address_with_pin = full_address_with_pin
         self.gst = gst
-        self.industry_id = industry
+        self.industry = industry
         self.plan_type = plan_type
         self.bitrix_url = bitrix_url
         self.license_extension = license_extension
@@ -84,7 +84,7 @@ class Company:
             "start_date": self.start_date,
             "full_address_with_pin": self.full_address_with_pin,
             "gst": self.gst,
-            "industry_id": self.industry,
+            "industry": self.industry,
             "plan_type": self.plan_type,
             "bitrix_url": self.bitrix_url,
             "license_extension": self.license_extension

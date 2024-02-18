@@ -83,7 +83,7 @@ def product_type_deletion(current_user: dict, database: Database, payload: dict)
         "payload": None,
         "status": "success",
         "message": "Product type successfully deleted"
-    }, 204
+    }, 200
 
 
 def all_product_types(database: Database) -> Tuple[dict, int]:
@@ -118,11 +118,14 @@ def product_creation(current_user: dict, database: Database, payload: dict) -> R
         unit = payload['unit']
         base_price = payload['base_price']
         implementation_fee = payload['implementation_fee']
-        default_vendor_discount = payload['default_vender_discount']
+        default_vendor_discount = payload['default_vendor_discount']
         description_left = payload['description_left']
         description_right = payload['description_right']
-    except KeyError:
-        return Response(400, 'error', message='Incomplete information')
+    except KeyError as e:
+        return Response(400, 'error', message='Incomplete information', payload={'error': str(e)})
+
+    if not unique_name or  not product_type_id or not item_description or not particulars or not default_quantity or not fixed_quantity or not unit or not base_price or not implementation_fee or not default_vendor_discount or not description_left or not description_right:
+        return Response(400, "error", message="Incomplete information")
     
     try:
         base_price = Price(base_price['inr'], base_price['usd'], base_price['aed'], base_price['eur'], base_price['gbp'])
@@ -188,14 +191,14 @@ def product_updation(current_user: dict, database: Database, payload: dict) -> R
         return Response(404, 'error', message='Product not found')
     
     for key in new.keys():
-        if key not in existing_product.keys():
+        if key not in existing_product.keys() and key != 'product_type_id':
             return Response(400, "error", message=f"Invalid attribute to update: {key}")
 
     if new.get('_id'):
         return Response(400, "error", message=f"Invalid attribute to update: _id")
     
-    if new.get('unique_name'):
-        return Response(400, "error", message=f"Invalid attribute to update: unique_name")
+    if new.get('product_type'):
+        return Response(400, "error", message=f"Invalid attribute to update: product_type")
     
     if new.get('product_type_id'):
         product_type_id = new['product_type_id']
@@ -210,7 +213,7 @@ def product_updation(current_user: dict, database: Database, payload: dict) -> R
     updated = products_collection.update_one({ 'unique_name': unique_name }, { '$set': new })
 
     if updated.acknowledged:
-        logger.info(f'product named "{unique_name}" has been updated by user named "{current_user["name"]}"')
+        logger.debug(f'product named "{unique_name}" updated by user named "{current_user["name"]}": {new}')
 
         return Response(200, 'success', message='Product updated successfully')
     
@@ -233,7 +236,7 @@ def product_deletion(current_user: dict, database: Database, payload: dict) -> R
     products_collection.delete_one({ 'unique_name': unique_name }) 
     logger.warning(f'product named "{unique_name}" deleted by user named "{current_user["name"]}"')
 
-    return Response(204, 'success', message='Product deleted successfully')
+    return Response(200, 'success', message='Product deleted successfully')
 
 
 def product_existing(current_user: dict, database: Database, payload: dict) -> Response:

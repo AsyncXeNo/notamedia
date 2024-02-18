@@ -6,7 +6,7 @@ This repository contains the backend of the web utility project.
 
 - [x] User Registration and Login
 - [x] Access control
-- [ ] Data storage, updation and retrieval
+- [x] Data storage, updation and retrieval
     - [x] Signatures
     - [x] Products and Product Types
     - [x] Email Templates
@@ -14,6 +14,9 @@ This repository contains the backend of the web utility project.
     - [x] Industries
     - [x] Plan types
     - [x] Companies
-    - [ ] Commercials
+    - [x] Proposal Types
+    - [x] Payment Terms
+    - [x] Commercials
+- [ ] Front-end demo 
 - [ ] Document generation
 - [ ] Landing Page Generation
