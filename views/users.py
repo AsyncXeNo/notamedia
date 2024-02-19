@@ -294,6 +294,37 @@ def user_updation(current_user: dict, database: Database, payload: dict) -> Tupl
     }, 500
 
 
+def user_existing(current_user: dict, database: Database, payload: dict) -> Tuple[dict, int]:
+
+    if (not payload.get('username')):
+        return {
+            "payload": None,
+            "status": "error",
+            "message": "Incomplete information"
+        }, 400
+
+    username = payload.get('username')
+    
+    users_collection = database.get_collection(collections[User])
+    user = users_collection.find_one({ 'name': username })
+
+    if not user:
+        return {
+            "payload": None,
+            "status": "error",
+            "message": "User not found"
+        }, 404
+    
+    user['_id'] = str(user['_id'])
+    del(user['hashed_password'])
+
+    return {
+        "payload": user,
+        "status": "success",
+        "message": None
+    }, 200
+
+
 def create_new_client_user(database: Database, active: bool = True) -> dict:
     characters = string.ascii_letters + string.digits
     users_collection = database.get_collection(collections[User])

@@ -10,7 +10,7 @@ from pymongo.database import Database
 from loguru import logger
 
 from models.user import UserType
-from views.users import require_user_type, user_login, user_registration, create_new_client_user, user_deletion, user_updation, all_users
+from views.users import require_user_type, user_login, user_registration, create_new_client_user, user_deletion, user_updation, user_existing, all_users
 from views.products import product_type_creation, product_type_deletion, all_product_types, product_creation, product_updation, product_deletion, product_existing, all_products
 from views.signatures import signature_creation, signature_deletion, signature_updation, signature_existing, all_signatures
 from views.comparisons import comparison_creation, comparison_updation, comparison_deletion, comparison_existing, all_comparisons
@@ -112,6 +112,17 @@ def get_user(current_user):
     current_user['_id'] = str(current_user.get('_id'))
     
     return Response(200, 'success', payload=current_user).to_response()
+
+
+@app.route('/users/existing', methods=['GET'])
+@cross_origin()
+@require_user_type(database, UserType.SUPER_ADMIN)
+def get_existing_user(current_user):
+
+    if not request.data: return Response(400, "error", message="Incomplete information").to_response()
+
+    payload = json.loads(request.data)
+    return user_existing(current_user, database, payload)
 
 
 @app.route('/users', methods=['GET'])
