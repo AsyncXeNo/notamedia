@@ -4,6 +4,7 @@ import json
 import logging
 import traceback
 from flask import Flask, request
+from flask_cors import CORS, cross_origin
 from pymongo.mongo_client import MongoClient
 from pymongo.database import Database
 from loguru import logger
@@ -32,6 +33,8 @@ client: MongoClient
 database: Database
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 app.logger.disabled = True
 log = logging.getLogger('werkzeug')
 log.disabled = True
@@ -58,6 +61,7 @@ USER ROUTES
 """
 
 @app.route('/users/login', methods=['POST'])
+@cross_origin()
 def login():
 
     if not request.data: return Response(400, "error", message="Incomplete information").to_response()
@@ -67,6 +71,7 @@ def login():
 
 
 @app.route('/users/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def register_user(current_user):
 
@@ -77,6 +82,7 @@ def register_user(current_user):
 
 
 @app.route('/users/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_user(current_user):
     
@@ -87,6 +93,7 @@ def delete_user(current_user):
 
 
 @app.route('/users/update', methods=['PUT'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def update_user(current_user):
 
@@ -95,7 +102,20 @@ def update_user(current_user):
     payload = json.loads(request.data)
     return user_updation(current_user, database, payload)
 
+
+@app.route('/users/me', methods=['GET'])
+@cross_origin()
+@require_user_type(database, UserType.SUPER_ADMIN, UserType.WORKER, UserType.CLIENT)
+def get_user(current_user):
+
+    del(current_user['hashed_password'])
+    current_user['_id'] = str(current_user.get('_id'))
+    
+    return Response(200, 'success', payload=current_user).to_response()
+
+
 @app.route('/users', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def get_users(current_user):
 
@@ -107,6 +127,7 @@ PRODUCT TYPE ROUTES
 """    
 
 @app.route('/products/types/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def new_product_type(current_user):
     
@@ -117,6 +138,7 @@ def new_product_type(current_user):
 
 
 @app.route('/products/types/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_product_type(current_user):
     
@@ -127,6 +149,7 @@ def delete_product_type(current_user):
 
 
 @app.route('/products/types', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_product_types(current_user):
 
@@ -138,6 +161,7 @@ PRODUCT ROUTES
 """
 
 @app.route('/products/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def new_product(current_user):
 
@@ -148,6 +172,7 @@ def new_product(current_user):
 
 
 @app.route('/products/update', methods=['PUT'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def update_product(current_user):
 
@@ -158,6 +183,7 @@ def update_product(current_user):
     
 
 @app.route('/products/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_product(current_user):
 
@@ -168,6 +194,7 @@ def delete_product(current_user):
 
 
 @app.route('/products/existing', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_existing_product(current_user):
 
@@ -178,6 +205,7 @@ def get_existing_product(current_user):
 
 
 @app.route('/products', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_products(current_user):
 
@@ -189,6 +217,7 @@ SIGNATURE ROUTES
 """
 
 @app.route('/signatures/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def new_signature(current_user):
 
@@ -199,6 +228,7 @@ def new_signature(current_user):
 
 
 @app.route('/signatures/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_signature(current_user):
     
@@ -209,6 +239,7 @@ def delete_signature(current_user):
 
 
 @app.route('/signatures/update', methods=['PUT'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def update_signature(current_user):
     
@@ -219,6 +250,7 @@ def update_signature(current_user):
 
 
 @app.route('/signatures/existing', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_existing_signature(current_user):
 
@@ -229,6 +261,7 @@ def get_existing_signature(current_user):
 
 
 @app.route('/signatures', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_signatures(current_user):
 
@@ -241,6 +274,7 @@ EMAIL TEMPLATES
 
 
 @app.route('/emails/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def new_email_template(current_user):
     
@@ -251,6 +285,7 @@ def new_email_template(current_user):
 
 
 @app.route('/emails/update', methods=['PUT'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def update_email_template(current_user):
     
@@ -261,6 +296,7 @@ def update_email_template(current_user):
 
 
 @app.route('/emails/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_email_template(current_user):
     
@@ -271,6 +307,7 @@ def delete_email_template(current_user):
 
 
 @app.route('/emails/existing', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def get_existing_email_template(current_user):
     
@@ -281,6 +318,7 @@ def get_existing_email_template(current_user):
     
 
 @app.route('/emails', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_email_templates(current_user):
 
@@ -293,6 +331,7 @@ COMPARISON ROUTES
 
 
 @app.route('/comparisons/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def new_comparison(current_user):
 
@@ -303,6 +342,7 @@ def new_comparison(current_user):
 
 
 @app.route('/comparisons/update', methods=['PUT'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def update_comparison(current_user):
 
@@ -313,6 +353,7 @@ def update_comparison(current_user):
 
 
 @app.route('/comparisons/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_comparison(current_user):
     
@@ -323,6 +364,7 @@ def delete_comparison(current_user):
 
 
 @app.route('/comparisons/existing', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_existing_comparison(current_user):
 
@@ -333,6 +375,7 @@ def get_existing_comparison(current_user):
 
 
 @app.route('/comparisons', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_comparisons(current_user):
 
@@ -345,6 +388,7 @@ INDUSTRY ROUTES
 
 
 @app.route('/industries/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def create_industry(current_user):
 
@@ -355,6 +399,7 @@ def create_industry(current_user):
 
 
 @app.route('/industries/update', methods=['PUT'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def update_industry(current_user):
 
@@ -365,6 +410,7 @@ def update_industry(current_user):
 
 
 @app.route('/industries/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_industry(current_user):
 
@@ -375,6 +421,7 @@ def delete_industry(current_user):
 
 
 @app.route('/industries/existing', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_existing_industry(current_user):
 
@@ -385,6 +432,7 @@ def get_existing_industry(current_user):
 
 
 @app.route('/industries', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_industries(current_user):
 
@@ -397,6 +445,7 @@ PLAN TYPE ROUTES
 
 
 @app.route('/plan_types/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def create_plan_type(current_user):
 
@@ -408,6 +457,7 @@ def create_plan_type(current_user):
 
 
 @app.route('/plan_types/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_plan_type(current_user):
 
@@ -418,6 +468,7 @@ def delete_plan_type(current_user):
 
 
 @app.route('/plan_types', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_plan_types(current_user):
 
@@ -429,6 +480,7 @@ COMPANY ROUTES
 """
 
 @app.route('/companies/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def create_company(current_user):
 
@@ -439,6 +491,7 @@ def create_company(current_user):
 
 
 @app.route('/companies/update', methods=['PUT'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def update_company(current_user):
 
@@ -449,6 +502,7 @@ def update_company(current_user):
 
 
 @app.route('/companies/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_company(current_user):
 
@@ -459,6 +513,7 @@ def delete_company(current_user):
 
 
 @app.route('/companies/existing', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_existing_company(current_user):
 
@@ -469,6 +524,7 @@ def get_existing_company(current_user):
 
 
 @app.route('/companies', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_companies(current_user):
 
@@ -479,7 +535,9 @@ def get_companies(current_user):
 PROPOSAL TYPE ROUTES
 """
 
+
 @app.route('/proposal_types/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def create_proposal_type(current_user):
 
@@ -491,6 +549,7 @@ def create_proposal_type(current_user):
 
 
 @app.route('/proposal_types/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_proposal_type(current_user):
 
@@ -501,6 +560,7 @@ def delete_proposal_type(current_user):
 
 
 @app.route('/proposal_types', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_proposal_types(current_user):
 
@@ -513,6 +573,7 @@ PAYMENT TERMS
 
 
 @app.route('/payment_terms/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def create_payment_terms(current_user):
 
@@ -523,6 +584,7 @@ def create_payment_terms(current_user):
 
 
 @app.route('/payment_terms/update', methods=['PUT'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def update_payment_terms(current_user):
 
@@ -533,6 +595,7 @@ def update_payment_terms(current_user):
 
 
 @app.route('/payment_terms/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_payment_terms(current_user):
 
@@ -543,6 +606,7 @@ def delete_payment_terms(current_user):
 
 
 @app.route('/payment_terms/existing', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_existing_payment_terms(current_user):
 
@@ -553,6 +617,7 @@ def get_existing_payment_terms(current_user):
 
 
 @app.route('/payment_terms', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_payment_terms(current_user):
 
@@ -565,6 +630,7 @@ COMMERCIAL ROUTES
 
 
 @app.route('/commercials/new', methods=['POST'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def create_commercial(current_user):
 
@@ -575,6 +641,7 @@ def create_commercial(current_user):
 
 
 @app.route('/commercials/update', methods=['PUT'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def update_commercial(current_user):
 
@@ -585,6 +652,7 @@ def update_commercial(current_user):
 
 
 @app.route('/commercials/delete', methods=['DELETE'])
+@cross_origin()
 @require_user_type(database, UserType.SUPER_ADMIN)
 def delete_commercial(current_user):
 
@@ -595,6 +663,7 @@ def delete_commercial(current_user):
 
 
 @app.route('/commercials/existing', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_existing_commercial(current_user):
 
@@ -605,6 +674,7 @@ def get_existing_commercial(current_user):
 
 
 @app.route('/commercials', methods=['GET'])
+@cross_origin()
 @require_user_type(database, UserType.WORKER, UserType.SUPER_ADMIN)
 def get_commercials(current_user):
 
