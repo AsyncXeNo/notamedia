@@ -1,6 +1,6 @@
 # Description:
 
-This repository contains the backend of the web utility project.
+This repository contains the backend of the web utility project. Here is the [frontend](https://www.github.com/asyncxeno/notamedia-frontend).
 
 ## To Do
 
